@@ -2,7 +2,7 @@ FROM ubuntu:bionic
 
 RUN apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        cups printer-driver-cups-pdf python3 python3-pip coreutils 
+        cups printer-driver-cups-pdf python3 python-pip coreutils 
         #&& \
     #apt-get clean && find /var/lib/apt/lists -type f -delete
 

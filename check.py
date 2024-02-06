@@ -58,7 +58,8 @@ def wait_for_file_stable(pdf_file, timeout=30):
 def get_pdf_page_count(pdf_file):
     if wait_for_file_stable(pdf_file):
         try:
-            result = subprocess.check_output(["pdfinfo", pdf_file], stderr=subprocess.STDOUT, text=True)
+            resbytes = subprocess.check_output(["pdfinfo", pdf_file], stderr=subprocess.STDOUT, text=True)
+            result = resbytes.decode('utf-8')
             page_count_line = [line for line in result.split('\n') if line.startswith("Pages:")]
             if page_count_line:
                 page_count = int(page_count_line[0].split(":")[1].strip())
