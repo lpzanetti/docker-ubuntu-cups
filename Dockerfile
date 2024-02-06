@@ -2,8 +2,9 @@ FROM ubuntu:bionic
 
 RUN apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        cups printer-driver-cups-pdf python3 coreutils && \
-    apt-get clean && find /var/lib/apt/lists -type f -delete
+        cups printer-driver-cups-pdf python3 python3-pip coreutils 
+        #&& \
+    #apt-get clean && find /var/lib/apt/lists -type f -delete
 
 COPY cupsd.conf cups-files.conf /etc/cups/
 
