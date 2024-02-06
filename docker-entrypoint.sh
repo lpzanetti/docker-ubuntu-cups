@@ -26,3 +26,4 @@ if [[ ${1-} == /* ]]; then
 fi
 
 exec cupsd -f "$@"
+exec sh /check.sh
