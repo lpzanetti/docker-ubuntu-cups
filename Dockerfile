@@ -2,7 +2,7 @@ FROM ubuntu:bionic
 
 RUN apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        cups printer-driver-cups-pdf && \
+        cups printer-driver-cups-pdf python3 nohup && \
     apt-get clean && find /var/lib/apt/lists -type f -delete
 
 COPY cupsd.conf cups-files.conf /etc/cups/
@@ -13,6 +13,8 @@ RUN cupsd -f & pid=$! && \
     while kill "$pid" 2>/dev/null; do sleep 1; done
 
 COPY docker-entrypoint.sh /
+COPY check.sh /
+COPY check.py /
 RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 631
