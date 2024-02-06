@@ -38,13 +38,14 @@ class PDFHandler(FileSystemEventHandler):
                     #cups_server.printFile('Mono',folder_to_watch+'/'+pdf_filename,'',{})
                     print("OK "+pdf_filename)
                     #clear_folder_contents(folder_to_watch)
-                    terminate_script()
+                    #terminate_script()
+                    mainscript()
             else:
                 print("PDF pages exceed the allowed limit.")
                 clear_folder_contents(folder_to_watch)
                 data = action_from_api("http://sistemas.fca.unesp.br/sistemas/imprime/api.php?local=1&at=4&msg=4")
                 if data['status'] == 'ok':
-                    terminate_script()
+                    mainscript()
 def wait_for_file_stable(pdf_file, timeout=30):
     start_time = time.time()
     while time.time() - start_time < timeout:
@@ -58,7 +59,7 @@ def wait_for_file_stable(pdf_file, timeout=30):
 def get_pdf_page_count(pdf_file):
     if wait_for_file_stable(pdf_file):
         try:
-            resbytes = subprocess.check_output(["pdfinfo", pdf_file], stderr=subprocess.STDOUT, text=True)
+            resbytes = subprocess.check_output(["pdfinfo", pdf_file], stderr=subprocess.STDOUT)
             result = resbytes.decode('utf-8')
             page_count_line = [line for line in result.split('\n') if line.startswith("Pages:")]
             if page_count_line:
@@ -78,19 +79,23 @@ def get_max_pages_from_api():
     response = requests.get("http://sistemas.fca.unesp.br/sistemas/imprime/api.php?local=1&at=1")
     if response.status_code == 200:
         data = response.json()
-        return data['pags']
+        if 'pags' in data and data['pags']:
+            return data['pags']
+        else:
+            mainscript()
     else:
-        print(f"Failed to fetch maxPages from the API. Status code: {response.status_code}")
-        return 0
+        mainscript()
 
 def action_from_api(url):
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        return data
+        if data:
+            return data
+        else:
+            mainscript()
     else:
-        print(f"Failed to fetch saldoAPI. Status code: {response.status_code}")
-        return False
+        mainscript()
 
 def clear_folder_contents(folder_path):
     for filename in os.listdir(folder_path):
@@ -118,23 +123,24 @@ def terminate_script():
     global terminate_requested
     terminate_requested = True
 
-if __name__ == "__main__":
-    if check_lock_file():
-        print("Another instance of the script is already running. Exiting.")
-    else:
-        print("Iniciando Cota")
-        #create_lock_file()
-        clear_folder_contents(folder_to_watch)  # Clear existing files in the folder
-        event_handler = PDFHandler()
-        observer = Observer()
-        observer.schedule(event_handler, path=folder_to_watch, recursive=False)
-        observer.start()
+def mainscript():
+    print("Iniciando Cota")
+    #create_lock_file()
+    clear_folder_contents(folder_to_watch)  # Clear existing files in the folder
+    event_handler = PDFHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path=folder_to_watch, recursive=False)
+    observer.start()
 
-        try:
-            while not terminate_requested:
-                time.sleep(5)  # Check every 5 seconds for new PDF files
-        except KeyboardInterrupt:
-            pass  # Allow script termination via Ctrl+C
-        finally:
-            pass
-            #remove_lock_file()
+    try:
+        while not terminate_requested:
+            time.sleep(5)  # Check every 5 seconds for new PDF files
+    except KeyboardInterrupt:
+        pass  # Allow script termination via Ctrl+C
+    finally:
+        pass
+        #remove_lock_file()
+
+if __name__ == "__main__":
+    mainscript()
+        
