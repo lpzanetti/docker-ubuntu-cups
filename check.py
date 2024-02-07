@@ -34,8 +34,8 @@ class PDFHandler(FileSystemEventHandler):
                 print("PDF pages are within the allowed limit.")
                 data = action_from_api("http://sistemas.fca.unesp.br/sistemas/imprime/api.php?local=1&at=2&pags="+str(pdf_pages))
                 if data['status'] == 'ok':
-                    #cups_server = cups.Connection()
-                    #cups_server.printFile('Mono',folder_to_watch+'/'+pdf_filename,'',{})
+                    cups_server = cups.Connection()
+                    cups_server.printFile('Mono',folder_to_watch+'/'+pdf_filename,'',{})
                     print("OK "+pdf_filename)
                     #clear_folder_contents(folder_to_watch)
                     #terminate_script()
